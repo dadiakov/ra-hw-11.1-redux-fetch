@@ -1,0 +1,100 @@
+h1,
+p {
+  font-family: Lato;
+}
+
+.btn {
+  margin-left: 5px;
+  min-width: 27px;
+  min-height: 21px;
+  border: 1px solid lightgray;
+  cursor: pointer;
+}
+
+.edit-button {
+  background-color: rgba(64, 240, 78, 0.61);
+}
+
+.edit-button:hover {
+  background-color: rgba(64, 240, 79, 0.781);
+}
+
+.delete-button {
+  background-color: rgba(247, 6, 6, 0.507);
+}
+
+.delete-button:hover {
+  background-color: rgba(247, 6, 6, 0.651);
+}
+
+.save-button {
+  width: 75px;
+  background-color: #1388fdb9;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #1388fde3;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: rgba(212, 212, 212, 0.575);
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+.lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  margin: 8px;
+  border: 5px solid rgb(163, 163, 163);
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: rgb(163, 163, 163) transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spin_theme_alfa-on-white.spin_size_xl {
+  background-image: url("https://alfa-laboratory.github.io/arui-feather/styleguide/w_xl.1b44d12b5b708f889d804dac0b812b4e.png");
+}
+
+.error-div {
+  width: 500px;
+  height: 50px;
+  display: flex;
+  background-color: red;
+  color: white;
+  font-size: x-large;
+}
+
+.error-div > div {
+  margin: auto;
+}
