@@ -5,6 +5,8 @@ import {
   removeItem,
   setSortValue,
   editItem,
+  setLoading,
+  setError
 } from '../actions/actionCreators';
 import { EDIT_ITEM } from '../actions/actionTypes';
 import Ring from './Ring';
@@ -14,33 +16,44 @@ import store from "../store"
 import { Redirect, Route } from 'react-router';
 
 export default function ItemsList() {
+  console.log('itemlist')
   const items = useSelector((state) => {
     const items = state.itemsListReducer.items;
     const re = new RegExp(state.itemsListReducer.sortValue, 'i');
     const sortedArray = items.filter((e) => re.exec(e.name));
     return sortedArray;
   });
-
   const item = useSelector(state => state.createItemFormReducer);
-  console.log(editItem)
+  const editStatus = useSelector(
+    (state) => state.statusReducer.editStatus
+  );
+  console.log(editStatus)
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [onEdit, setOnEdit] = useState(false);
+  const loading = useSelector(state => state.statusReducer.loading);
+  const error = useSelector(state => state.statusReducer.error)
+
+
+
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState(false);
+  // const [onEdit, setOnEdit] = useState(false);
 
 
   const renderAllData = async () => {
-      setLoading(true);
+      dispatch(setLoading(true));
       try {
         const json = await fetch('http://localhost:7070/api/services');
         const data = await json.json();
-        console.log(data)
         dispatch({type: 'ALL_ITEMS', payload: data})
       } catch (error) {
-        setError(true);
+        dispatch(setError(true));
+        setTimeout(() => {
+          dispatch(setError(false));
+          renderAllData();                    
+        }, 1000);
         console.log(error)
       } finally {
-        setLoading(false)
+        dispatch(setLoading(false));
       }
   }
 
@@ -52,22 +65,24 @@ export default function ItemsList() {
   const [sortInput, setSortInput] = useState('');
 
   const deleteItem = async (id) => {
-    setLoading(true);
+    dispatch(setLoading(true));
     try {
       await fetch(`http://localhost:7070/api/services/${id}`, {method: 'DELETE'});
     } catch (error) {
-      setError(true);
+      dispatch(setError(true));
+      setTimeout(() => {
+        dispatch(setError(false));
+        renderAllData();                    
+      }, 1000);
     } finally {
-      renderAllData();
+      dispatch(setLoading(false));
     }
   };
 
   const edit = (e) => {
     const { id, name, price, content } = e;
-    dispatch(editItem({
-      item: { id, name, price, content },
-      editStatus: true,
-    }));
+    dispatch(editItem({ id, name, price, content }));
+    dispatch(setEditStatus(true))
   };
 
   const sortValueChangeHandler = (e) => {
@@ -78,7 +93,7 @@ export default function ItemsList() {
   if(loading) return <Ring />
   if(error) return <Error />
 
-  return ( item.editStatus ? <Redirect to={/services/ + item.item.id} /> : 
+  return ( editStatus ? <Redirect to={/services/ + item.id} /> : 
     <React.Fragment>
       <CreateItemForm />
       <div style={{ marginTop: 25 }}>Фильтр:</div>
@@ -94,14 +109,14 @@ export default function ItemsList() {
         </button>
       ) : null}
       <ul className="work-item-container">
-        {items.map((e) => (
-          <li id={e.id} key={e.id}>
-            {e.name} {e.price}
-            <button onClick={() => edit(e)} className="btn edit-button">
+        {items.map((item) => (
+          <li id={item.id} key={item.id}>
+            {item.name} {item.price}
+            <button onClick={() => edit(item)} className="btn edit-button">
               ✎
             </button>
             <button
-              onClick={() => deleteItem(e.id)}
+              onClick={() => deleteItem(item.id)}
               className="btn delete-button"
             >
               ✖

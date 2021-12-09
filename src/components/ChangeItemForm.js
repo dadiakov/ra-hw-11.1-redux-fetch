@@ -1,34 +1,64 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setEditStatus, editItem, addItem } from '../actions/actionCreators';
+import { setEditStatus, editItem, addItem, setLoading, setError } from '../actions/actionCreators';
+import { Redirect, Route } from 'react-router';
 import Ring from './Ring';
 import Error from './Error';
 
 export default function ChangeItemForm({ match: { url }}) {
-  const [item, setItem] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [editStatus, setEditStatus] = useState(true);
+  console.log('change')
+  const item = useSelector((state) => state.createItemFormReducer);
+  const loading = useSelector(state => state.statusReducer.loading);
+  const error = useSelector(state => state.statusReducer.error)
+  const editStatus = useSelector(state => state.statusReducer.editStatus);
   
   const dispatch = useDispatch();
 
-  const fetchData = async () => {
-    setLoading(true);
+  const getItem = async () => {
+    dispatch(setLoading(true));
       try {
           const json = await fetch('http://localhost:7070/api' + url);
           const data = await json.json();
-          setItem(data);          
+          dispatch(editItem(data));          
       } catch (error) {
-        setError(true);
-        console.log(error)
+        dispatch(setError(true));
+        console.log(error);
+        setTimeout(() => {
+          dispatch(setError(false));
+          getItem();                 
+        }, 1000);
       } finally {
-        setLoading(false)
+        dispatch(setLoading(false));
       }
   }
 
   useEffect(() => {
-    fetchData();
+    getItem();
   },[])
+
+  const sendEditedItem = async () => {
+    dispatch(setLoading(true));
+      try {
+          await fetch('http://localhost:7070/api/services', { method: 'POST', headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          }, body: JSON.stringify(item)});
+          console.log('я тут')
+          dispatch(setLoading(false));
+          dispatch(setEditStatus(false));        
+      } catch (error) {
+        dispatch(setError(true));
+        setTimeout(() => {
+          dispatch(setError(false));
+          sendEditedItem()
+        }, 700);
+        console.log(error)
+      } finally {
+        console.log(editStatus)
+        dispatch(setError(false));
+        onCancelClick();
+
+      }
+  }
 
 
   const onFormSubmit = (e) => {
@@ -41,24 +71,26 @@ export default function ChangeItemForm({ match: { url }}) {
       return;
     }
     dispatch(addItem(item));
-    onCancelClick();
+    sendEditedItem();
   };
 
   const onCancelClick = () => {
-    dispatch(editItem({ name: '', price: '', content: '' }));
-    dispatch(setEditStatus(false));
+    dispatch(editItem({...item, name: '', price: '', content: '' }));
   };
 
   const onChangeHandler = (e) => {
-    dispatch(setEditStatus(true));
+    if (!editStatus) { 
+      dispatch(setEditStatus(true)); 
+      return;
+    };
     const { name, value } = e.target;
-    dispatch(editItem({ ...item, [name]: value }));
+    dispatch(editItem({...item, [name]: value }));
   };
 
   if(loading) return <Ring />
   if(error) return <Error />
 
-  return (
+  return ( !editStatus ? <Redirect to={'/services'} /> :
     <form onSubmit={onFormSubmit} action="">
       <input
         name="name"

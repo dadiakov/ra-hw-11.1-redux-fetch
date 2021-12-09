@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setEditStatus, editItem, addItem } from '../actions/actionCreators';
+import { setEditStatus, editItem, setLoading, setError } from '../actions/actionCreators';
+import Ring from './Ring';
+import Error from './Error';
 
 export default function CreateItemForm() {
-  const item = useSelector((state) => state.createItemFormReducer.item);
-  const editStatus = useSelector(
-    (state) => state.createItemFormReducer.editStatus
-  );
+  console.log('create')
+  const item = useSelector((state) => state.createItemFormReducer);
+  const editStatus = useSelector(state => state.statusReducer.editStatus);
+  const loading = useSelector(state => state.statusReducer.loading);
+  const error = useSelector(state => state.statusReducer.error)
+
   const dispatch = useDispatch();
 
   const onFormSubmit = (e) => {
@@ -18,20 +22,54 @@ export default function CreateItemForm() {
       console.log('Заполните поля имя и стоимость');
       return;
     }
-    dispatch(addItem(item));
-    onCancelClick();
+    addNewItem();
   };
 
+  const addNewItem = async () => {
+    dispatch(setLoading(true));
+      try {
+          await fetch('http://localhost:7070/api/services', { method: 'POST', headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          }, body: JSON.stringify({...item, id: 0 })});       
+      } catch (error) {
+        dispatch(setError(true));
+        console.log(error)
+      } finally {
+        renderAllData();
+        onCancelClick();
+      }
+  }
+
+  const renderAllData = async () => {
+    dispatch(setLoading(true));
+    try {
+      const json = await fetch('http://localhost:7070/api/services');
+      const data = await json.json();
+      dispatch({type: 'ALL_ITEMS', payload: data})
+    } catch (error) {
+      dispatch(setError(true));
+      setTimeout(() => {
+        dispatch(setError(false));
+        renderAllData();                    
+      }, 1000);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
   const onCancelClick = () => {
-    dispatch(editItem({ name: '', price: '', content: '' }));
+    dispatch(editItem({...item, name: '', price: '', content: '' }));
     dispatch(setEditStatus(false));
   };
 
   const onChangeHandler = (e) => {
-    dispatch(setEditStatus(true));
+    // dispatch(setEditStatus(true));
     const { name, value } = e.target;
-    dispatch(editItem({ ...item, [name]: value }));
+    dispatch(editItem({...item, [name]: value }));
   };
+
+  if(loading) return <Ring />
+  if(error) return <Error />
 
   return (
     <form onSubmit={onFormSubmit} action="">
