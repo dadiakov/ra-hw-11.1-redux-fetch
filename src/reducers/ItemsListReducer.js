@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { ADD_ITEM, REMOVE_ITEM, SET_SORT_VALUE } from '../actions/actionTypes';
+import { ADD_ITEM, REMOVE_ITEM, SET_SORT_VALUE, ALL_ITEMS } from '../actions/actionTypes';
 
 const initialState = {
   items: [],
@@ -8,7 +8,7 @@ const initialState = {
 
 export default function ItemsListReducer(state = initialState, action) {
   switch (action.type) {
-    case 'ALL_ITEMS':
+    case ALL_ITEMS:
       state.items = action.payload;
       return state;
     case ADD_ITEM:

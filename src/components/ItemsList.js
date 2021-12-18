@@ -2,21 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   setEditStatus,
-  removeItem,
   setSortValue,
   editItem,
   setLoading,
-  setError
+  setError,
+  allItems,
 } from '../actions/actionCreators';
-import { EDIT_ITEM } from '../actions/actionTypes';
 import Ring from './Ring';
 import Error from './Error';
 import CreateItemForm from './CreateItemForm';
-import store from "../store"
-import { Redirect, Route } from 'react-router';
+import { Redirect } from 'react-router';
 
 export default function ItemsList() {
-  console.log('itemlist')
   const items = useSelector((state) => {
     const items = state.itemsListReducer.items;
     const re = new RegExp(state.itemsListReducer.sortValue, 'i');
@@ -27,24 +24,24 @@ export default function ItemsList() {
   const editStatus = useSelector(
     (state) => state.statusReducer.editStatus
   );
-  console.log(editStatus)
 
   const loading = useSelector(state => state.statusReducer.loading);
   const error = useSelector(state => state.statusReducer.error)
 
+  const [sortInput, setSortInput] = useState('');
 
+  const dispatch = useDispatch();
 
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState(false);
-  // const [onEdit, setOnEdit] = useState(false);
-
-
+  useEffect(() => {
+    renderAllData();    
+  }, []);
+  
   const renderAllData = async () => {
       dispatch(setLoading(true));
       try {
         const json = await fetch('http://localhost:7070/api/services');
         const data = await json.json();
-        dispatch({type: 'ALL_ITEMS', payload: data})
+        dispatch(allItems(data))
       } catch (error) {
         dispatch(setError(true));
         setTimeout(() => {
@@ -57,13 +54,6 @@ export default function ItemsList() {
       }
   }
 
-  useEffect(() => {
-    renderAllData();    
-  }, []);
-
-  const dispatch = useDispatch();
-  const [sortInput, setSortInput] = useState('');
-
   const deleteItem = async (id) => {
     dispatch(setLoading(true));
     try {
@@ -71,11 +61,11 @@ export default function ItemsList() {
     } catch (error) {
       dispatch(setError(true));
       setTimeout(() => {
-        dispatch(setError(false));
-        renderAllData();                    
+        dispatch(setError(false));                    
       }, 1000);
     } finally {
       dispatch(setLoading(false));
+      renderAllData();
     }
   };
 
@@ -85,9 +75,9 @@ export default function ItemsList() {
     dispatch(setEditStatus(true))
   };
 
-  const sortValueChangeHandler = (e) => {
-    setSortInput(e.target.value);
-    dispatch(setSortValue(e.target.value));
+  const sortValueChangeHandler = ({ target: { value }}) => {
+    setSortInput(value);
+    dispatch(setSortValue(value));
   };
 
   if(loading) return <Ring />
@@ -96,11 +86,11 @@ export default function ItemsList() {
   return ( editStatus ? <Redirect to={/services/ + item.id} /> : 
     <React.Fragment>
       <CreateItemForm />
-      <div style={{ marginTop: 25 }}>Фильтр:</div>
+      <div className="filter">Фильтр:</div>
       <input value={sortInput} onChange={(e) => sortValueChangeHandler(e)} />
       {sortInput ? (
         <button
-          style={{ marginLeft: 5 }}
+          className="clear-filter-btn"
           onClick={() => {
             sortValueChangeHandler({ target: { value: '' } });
           }}

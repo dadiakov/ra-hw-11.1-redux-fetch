@@ -5,7 +5,8 @@ import {
     SET_EDIT_STATUS,
     SET_SORT_VALUE,
     SET_LOADING,
-    SET_ERROR
+    SET_ERROR,
+    ALL_ITEMS,
 } from './actionTypes';
   
 export function setEditStatus(status) {
@@ -34,5 +35,9 @@ export function setLoading(value) {
 
 export function setError(value) {
     return { type: SET_ERROR, payload: value }
+}
+
+export function allItems(items) {
+    return { type: ALL_ITEMS, payload: items }
 }
 

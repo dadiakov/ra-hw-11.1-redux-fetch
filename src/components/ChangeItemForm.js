@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEditStatus, editItem, addItem, setLoading, setError } from '../actions/actionCreators';
-import { Redirect, Route } from 'react-router';
+import { Redirect } from 'react-router';
 import Ring from './Ring';
 import Error from './Error';
 
 export default function ChangeItemForm({ match: { url }}) {
-  console.log('change')
   const item = useSelector((state) => state.createItemFormReducer);
   const loading = useSelector(state => state.statusReducer.loading);
   const error = useSelector(state => state.statusReducer.error)
@@ -39,12 +38,15 @@ export default function ChangeItemForm({ match: { url }}) {
   const sendEditedItem = async () => {
     dispatch(setLoading(true));
       try {
-          await fetch('http://localhost:7070/api/services', { method: 'POST', headers: {
+        await fetch('http://localhost:7070/api/services', { 
+          method: 'POST', 
+          headers: {
             'Content-Type': 'application/json;charset=utf-8'
-          }, body: JSON.stringify(item)});
-          console.log('я тут')
-          dispatch(setLoading(false));
-          dispatch(setEditStatus(false));        
+          }, 
+          body: JSON.stringify(item)
+        });
+        dispatch(setLoading(false));
+        dispatch(setEditStatus(false));        
       } catch (error) {
         dispatch(setError(true));
         setTimeout(() => {
@@ -53,13 +55,10 @@ export default function ChangeItemForm({ match: { url }}) {
         }, 700);
         console.log(error)
       } finally {
-        console.log(editStatus)
         dispatch(setError(false));
         onCancelClick();
-
       }
   }
-
 
   const onFormSubmit = (e) => {
     e.preventDefault();
@@ -76,14 +75,14 @@ export default function ChangeItemForm({ match: { url }}) {
 
   const onCancelClick = () => {
     dispatch(editItem({...item, name: '', price: '', content: '' }));
+    dispatch(setEditStatus(false));
   };
 
-  const onChangeHandler = (e) => {
+  const onChangeHandler = ({ target : { name, value }}) => {
     if (!editStatus) { 
       dispatch(setEditStatus(true)); 
       return;
     };
-    const { name, value } = e.target;
     dispatch(editItem({...item, [name]: value }));
   };
 

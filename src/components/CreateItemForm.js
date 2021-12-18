@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setEditStatus, editItem, setLoading, setError } from '../actions/actionCreators';
+import { editItem, setLoading, setError, allItems } from '../actions/actionCreators';
 import Ring from './Ring';
 import Error from './Error';
 
 export default function CreateItemForm() {
-  console.log('create')
   const item = useSelector((state) => state.createItemFormReducer);
-  const editStatus = useSelector(state => state.statusReducer.editStatus);
   const loading = useSelector(state => state.statusReducer.loading);
   const error = useSelector(state => state.statusReducer.error)
+  const [onEdit, setOnEdit] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -28,12 +27,19 @@ export default function CreateItemForm() {
   const addNewItem = async () => {
     dispatch(setLoading(true));
       try {
-          await fetch('http://localhost:7070/api/services', { method: 'POST', headers: {
+        await fetch('http://localhost:7070/api/services', { 
+          method: 'POST', 
+          headers: {
             'Content-Type': 'application/json;charset=utf-8'
-          }, body: JSON.stringify({...item, id: 0 })});       
+          }, 
+          body: JSON.stringify({...item, id: 0 })
+        });       
       } catch (error) {
         dispatch(setError(true));
-        console.log(error)
+        console.log(error);
+        setTimeout(() => {
+          dispatch(setError(false));                
+        }, 1000);
       } finally {
         renderAllData();
         onCancelClick();
@@ -45,7 +51,7 @@ export default function CreateItemForm() {
     try {
       const json = await fetch('http://localhost:7070/api/services');
       const data = await json.json();
-      dispatch({type: 'ALL_ITEMS', payload: data})
+      dispatch(allItems(data))
     } catch (error) {
       dispatch(setError(true));
       setTimeout(() => {
@@ -59,12 +65,11 @@ export default function CreateItemForm() {
 
   const onCancelClick = () => {
     dispatch(editItem({...item, name: '', price: '', content: '' }));
-    dispatch(setEditStatus(false));
+    setOnEdit(false)
   };
 
-  const onChangeHandler = (e) => {
-    // dispatch(setEditStatus(true));
-    const { name, value } = e.target;
+  const onChangeHandler = ({ target : { name, value }}) => {
+    if (!onEdit) setOnEdit(true);
     dispatch(editItem({...item, [name]: value }));
   };
 
@@ -97,7 +102,7 @@ export default function CreateItemForm() {
       <button onClick={onSaveClick} className="btn save-button">
         Save
       </button>
-      {editStatus ? (
+      {onEdit ? (
         <button onClick={onCancelClick} className="btn cancel-button">
           Cancel
         </button>

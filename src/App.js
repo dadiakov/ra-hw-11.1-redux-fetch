@@ -1,7 +1,6 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import CreateItemForm from './components/CreateItemForm';
 import ItemsList from './components/ItemsList';
 import ChangeItemForm from './components/ChangeItemForm'
 

@@ -98,3 +98,11 @@ li {
 .error-div > div {
   margin: auto;
 }
+
+.filter {
+  margin-top: 25px;
+}
+
+.clear-filter-btn {
+  margin-left: 5px;
+}
