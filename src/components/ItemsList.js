@@ -37,21 +37,21 @@ export default function ItemsList() {
   }, []);
   
   const renderAllData = async () => {
-      dispatch(setLoading(true));
-      try {
-        const json = await fetch('http://localhost:7070/api/services');
-        const data = await json.json();
-        dispatch(allItems(data))
-      } catch (error) {
-        dispatch(setError(true));
-        setTimeout(() => {
-          dispatch(setError(false));
-          renderAllData();                    
-        }, 1000);
-        console.log(error)
-      } finally {
-        dispatch(setLoading(false));
-      }
+    dispatch(setLoading(true));
+    try {
+      const json = await fetch('http://localhost:7070/api/services');
+      const data = await json.json();
+      dispatch(allItems(data))
+    } catch (error) {
+      dispatch(setError(true));
+      setTimeout(() => {
+        dispatch(setError(false));
+        renderAllData();                    
+      }, 1000);
+      console.log(error)
+    } finally {
+      dispatch(setLoading(false));
+    }
   }
 
   const deleteItem = async (id) => {

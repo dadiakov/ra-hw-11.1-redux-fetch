@@ -58,6 +58,7 @@ export default function CreateItemForm() {
         dispatch(setError(false));
         renderAllData();                    
       }, 1000);
+      console.log(error)
     } finally {
       dispatch(setLoading(false));
     }
